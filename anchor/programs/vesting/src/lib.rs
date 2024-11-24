@@ -9,7 +9,16 @@ declare_id!("AsjZ3kWAUSQRNt2pZVeJkywhZ6gpLpHZmJjduPmKZDZZ");
 pub mod vesting {
     use super::*;
 
-    pub fn createVestingAccount(ctx: Context<CreateVestingAccount>, company_name: String) -> Result<()> {
+    pub fn create_vesting_account(ctx: Context<CreateVestingAccount>, company_name: String) -> Result<()> {
+
+      *ctx.accounts.vesting_account = VestingAccount {
+        owner: ctx.accounts.signer.key(),
+        mint: ctx.accounts.mint.key(),
+        cold_token_account: ctx.accounts.cold_token_account.key(),
+        company_name,
+        cold_bump: ctx.bumps.cold_token_account,
+        bump: ctx.bumps.vesting_account
+      };
 
       Ok(())
     }
@@ -59,6 +68,6 @@ pub struct VestingAccount {
   pub cold_token_account: Pubkey,
   #[max_len(50)]
   pub company_name: String,
-  pub treasury_bump: u8,
+  pub cold_bump: u8,
   pub bump: u8
 }
