@@ -23,6 +23,10 @@ pub mod vesting {
       Ok(())
     }
 
+    pub fn create_employee_account(ctx: Context<CreateEmployeeAccount>) {
+
+    }
+
 }
 
 
@@ -58,6 +62,29 @@ pub struct CreateVestingAccount<'info> {
   pub system_program: Program<'info, System>,
   pub token_program: Interface<'info, TokenInterface>
 
+}
+#[derive(Accounts)]
+pub struct CreateEmployeeAccount<'info> {
+  #[account(mut)]
+  pub owner: Signer<'info>,
+  pub beneficiary: SystemAccount<'info>,
+
+  #[account(
+    has_one = owner
+  )]
+  pub vesting_account: Account<'info, VestingAccount>,
+
+  #[account(
+    init,
+    space = 8 + EmployeeAccount::INIT_SPACE,
+    payer = owner,
+    seeds = [b"employee_vesting", beneficiary.key().as_ref(), vesting_account.key().as_ref()],
+    bump
+  )]
+
+  pub employee_account: Account<'info, EmployeeAccount>,
+
+  pub system_program: Program<'info, System>
 }
 
 #[account]
