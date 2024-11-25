@@ -71,3 +71,15 @@ pub struct VestingAccount {
   pub cold_bump: u8,
   pub bump: u8
 }
+
+#[account]
+#[derive(InitSpace)]
+pub struct EmployeeAccount {
+  pub beneficiary: Pubkey,
+  pub start_time: i64,
+  pub end_time: i64,
+  pub cliff_time: i64,
+  pub vesting_account: Pubkey,
+  pub total_amount: u64,
+  pub total_withdrawn: u64
+}
