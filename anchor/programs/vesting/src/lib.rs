@@ -38,8 +38,14 @@ pub mod vesting {
       Ok(())
     }
 
-    pub fn claim_tokens(ctx: Context<ClaimTokens>,company_name: String) {
+    pub fn claim_tokens(ctx: Context<ClaimTokens>,company_name: String) -> Result<()> {
+      let employee_account = &mut ctx.accounts.employee_account;
+      let now = Clock::get()?.unix_timestamp;
+      if now < employee_account.cliff_time {
+        return Err(ErrorCode::ClaimNotAvailableYet.into())
+      }
 
+      Ok(())
     }
 
 }
@@ -171,4 +177,10 @@ pub struct EmployeeAccount {
   pub total_amount: u64,
   pub total_withdrawn: u64,
   pub bump: u8
+}
+
+#[error_code]
+pub enum ErrorCode {
+  #[msg("Claim Not Available Yet")]
+    ClaimNotAvailableYet,
 }
