@@ -1,7 +1,7 @@
 #![allow(clippy::result_large_err)]
 
 use anchor_lang::prelude::*;
-use anchor_spl::token_interface::{Mint, TokenAccount, TokenInterface};
+use anchor_spl::{token_2022::spl_token_2022::extension::memo_transfer::instruction, token_interface::{Mint, TokenAccount, TokenInterface}};
 
 declare_id!("AsjZ3kWAUSQRNt2pZVeJkywhZ6gpLpHZmJjduPmKZDZZ");
 
@@ -38,7 +38,13 @@ pub mod vesting {
       Ok(())
     }
 
+    pub fn claim_tokens(ctx: Context<ClaimTokens>,company_name: String) {
+
+    }
+
 }
+
+
 
 
 #[derive(Accounts)]
@@ -97,6 +103,38 @@ pub struct CreateEmployeeAccount<'info> {
 
   pub system_program: Program<'info, System>
 }
+
+#[derive(Accounts)]
+#[instruction(company_name: String)]
+pub struct ClaimTokens<'info> {
+  #[account(mut)]
+  pub beneficiary: Signer<'info>,
+
+  #[account(
+    mut,
+    seeds = [b"employee_vesting", beneficiary.key().as_ref(), vesting_account.key().as_ref()],
+    bump = employee_account.bump,
+    has_one = beneficiary,
+    has_one = vesting_account
+  )]
+  pub employee_account: Account<'info, EmployeeAccount>,
+
+  #[account(
+    mut,
+    seeds = [company_name.as_ref()],
+    bump = vesting_account.bump,
+    has_one = cold_token_account,
+    has_one = mint
+  )]
+  pub vesting_account: Account<'info, VestingAccount>,
+  pub mint: InterfaceAccount<'info, Mint>,
+
+  #[account(mut)]
+  pub cold_token_account: InterfaceAccount<'info, TokenAccount>
+
+}
+
+
 
 #[account]
 #[derive(InitSpace)]
