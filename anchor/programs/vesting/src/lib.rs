@@ -79,7 +79,17 @@ pub mod vesting {
         authority: ctx.accounts.cold_token_account.to_account_info()
       };
 
-      
+      let cpi_program = ctx.accounts.token_program.to_account_info();
+
+      let signer_seeds: &[&[&[u8]]] = &[
+        &[b"vesting_cold",
+        ctx.accounts.vesting_account.company_name.as_ref(),
+        &[ctx.accounts.vesting_account.cold_bump]]
+      ];
+
+      let cpi_context = CpiContext::new(cpi_program, transfer_cpi_accounts).with_signer(signer_seeds);
+
+      let decimals = ctx.accounts.mint.decimals;
 
       Ok(())
     }
