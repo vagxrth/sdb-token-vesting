@@ -1,7 +1,7 @@
 #![allow(clippy::result_large_err)]
 
 use anchor_lang::prelude::*;
-use anchor_spl::{token_2022::spl_token_2022::extension::memo_transfer::instruction, token_interface::{Mint, TokenAccount, TokenInterface}};
+use anchor_spl::{associated_token::AssociatedToken, token_2022::spl_token_2022::extension::memo_transfer::instruction, token_interface::{Mint, TokenAccount, TokenInterface}};
 
 declare_id!("AsjZ3kWAUSQRNt2pZVeJkywhZ6gpLpHZmJjduPmKZDZZ");
 
@@ -130,7 +130,19 @@ pub struct ClaimTokens<'info> {
   pub mint: InterfaceAccount<'info, Mint>,
 
   #[account(mut)]
-  pub cold_token_account: InterfaceAccount<'info, TokenAccount>
+  pub cold_token_account: InterfaceAccount<'info, TokenAccount>,
+
+  #[account(
+    init_if_needed,
+    payer = beneficiary,
+    associated_token::mint = mint,
+    associated_token::authority = beneficiary,
+    associated_token::token_program = token_program
+  )]
+  pub employee_token_account: InterfaceAccount<'info, TokenAccount>,
+  pub token_program: Interface<'info, TokenInterface>,
+  pub associated_token_program: Program<'info, AssociatedToken>,
+  pub system_program: Program<'info, System>
 
 }
 
