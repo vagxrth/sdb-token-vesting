@@ -45,6 +45,13 @@ pub mod vesting {
         return Err(ErrorCode::ClaimNotAvailableYet.into())
       }
 
+      let time_since_start = now.saturating_sub(employee_account.start_time);
+      let total_vesting_time = employee_account.end_time.saturating_sub(employee_account.start_time);
+
+      if total_vesting_time == 0 {
+        return Err(ErrorCode::InvalidVestingPeriod.into())
+      }
+
       Ok(())
     }
 
@@ -183,4 +190,7 @@ pub struct EmployeeAccount {
 pub enum ErrorCode {
   #[msg("Claim Not Available Yet")]
     ClaimNotAvailableYet,
+    
+  #[msg("Invalid Vesting Period")]
+  InvalidVestingPeriod
 }
