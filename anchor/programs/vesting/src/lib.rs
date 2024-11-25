@@ -23,8 +23,19 @@ pub mod vesting {
       Ok(())
     }
 
-    pub fn create_employee_account(ctx: Context<CreateEmployeeAccount>) {
+    pub fn create_employee_account(ctx: Context<CreateEmployeeAccount>, start_time: i64, end_time: i64, total_amount: u64, cliff_time: i64) -> Result<()> {
+      *ctx.accounts.employee_account = EmployeeAccount {
+        beneficiary: ctx.accounts.beneficiary.key(),
+        start_time,
+        end_time,
+        total_amount,
+        total_withdrawn: 0,
+        cliff_time,
+        vesting_account: ctx.accounts.vesting_account.key(),
+        bump: ctx.bumps.employee_account
+      };
 
+      Ok(())
     }
 
 }
@@ -108,5 +119,6 @@ pub struct EmployeeAccount {
   pub cliff_time: i64,
   pub vesting_account: Pubkey,
   pub total_amount: u64,
-  pub total_withdrawn: u64
+  pub total_withdrawn: u64,
+  pub bump: u8
 }
