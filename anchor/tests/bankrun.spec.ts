@@ -19,6 +19,7 @@ let banksClient: BanksClient;
 let employer: Keypair;
 let mint: PublicKey;
 let beneficiaryProvider: BankrunProvider;
+let program2: Program<Vesting>;
 
   beforeAll(async() => {
     beneficiary = new anchor.web3.Keypair();
@@ -53,5 +54,7 @@ let beneficiaryProvider: BankrunProvider;
 
     beneficiaryProvider = new BankrunProvider(context);
     beneficiaryProvider.wallet = new NodeWallet(beneficiary);
+
+    program2 = new Program<Vesting>(IDL as Vesting, provider);
   })  
 })
