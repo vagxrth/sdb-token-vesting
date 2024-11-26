@@ -8,8 +8,11 @@ import { Program } from "@coral-xyz/anchor"
 import { Vesting }  from "../target/types/vesting"
 import { createMint } from "@solana/spl-token";
 import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
+import { Buffer } from "buffer";
 
 describe("Vesting Smart Contract Tests", () => {
+
+const companyName = 'THE HATE CLUB';
 
 let beneficiary: Keypair;
 let context: ProgramTestContext;
@@ -20,6 +23,10 @@ let employer: Keypair;
 let mint: PublicKey;
 let beneficiaryProvider: BankrunProvider;
 let program2: Program<Vesting>;
+let vestingAccountKey: PublicKey;
+let coldTokenAccount: PublicKey;
+let employeeAccount: PublicKey;
+
 
   beforeAll(async() => {
     beneficiary = new anchor.web3.Keypair();
@@ -56,5 +63,23 @@ let program2: Program<Vesting>;
     beneficiaryProvider.wallet = new NodeWallet(beneficiary);
 
     program2 = new Program<Vesting>(IDL as Vesting, provider);
+
+    [vestingAccountKey] = PublicKey.findProgramAddressSync(
+        [Buffer.from(companyName)],
+        program.programId
+    );
+
+    [coldTokenAccount] = PublicKey.findProgramAddressSync(
+        [Buffer.from("vesting_cold"), Buffer.from(companyName)],
+        program.programId
+    );
+
+    [employeeAccount] = PublicKey.findProgramAddressSync([
+        Buffer.from("employee_vesting"),
+        beneficiary.publicKey.toBuffer(),
+        vestingAccountKey.toBuffer()
+        ],
+        program.programId
+    );
   })  
 })
