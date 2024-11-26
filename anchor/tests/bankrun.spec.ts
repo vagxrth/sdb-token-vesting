@@ -3,11 +3,16 @@ import { Keypair, PublicKey } from '@solana/web3.js';
 import { ProgramTestContext, startAnchor } from "solana-bankrun";
 import IDL from "../target/idl/vesting.json"
 import { SYSTEM_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/native/system";
+import { BankrunProvider } from "anchor-bankrun";
+import { Program } from "@coral-xyz/anchor"
+import { Vesting }  from "../target/types/vesting"
 
 describe("Vesting Smart Contract Tests", () => {
 
 let beneficiary: Keypair;
 let context: ProgramTestContext;
+let provider: BankrunProvider;
+let program: Program<Vesting>;
 
   beforeAll(async() => {
     beneficiary = new anchor.web3.Keypair();
@@ -27,5 +32,10 @@ let context: ProgramTestContext;
         }
     ]
     );
+
+    provider = new BankrunProvider(context);
+    anchor.setProvider(provider);
+
+    program = new Program<Vesting>(IDL as Vesting, provider);
   })  
 })
