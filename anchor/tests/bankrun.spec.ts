@@ -4,7 +4,7 @@ import { BanksClient, ProgramTestContext, startAnchor } from "solana-bankrun";
 import IDL from "../target/idl/vesting.json"
 import { SYSTEM_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/native/system";
 import { BankrunProvider } from "anchor-bankrun";
-import { Program } from "@coral-xyz/anchor"
+import { BN, Program } from "@coral-xyz/anchor"
 import { Vesting }  from "../target/types/vesting"
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
@@ -104,4 +104,19 @@ let employeeAccount: PublicKey;
 
     console.log('Mint Cold Token Account: ', mintTx);
   });
+
+  it("Should Create Employee Vesting Account", async() => {
+    const tx2 = await program.methods.createEmployeeAccount(
+        new BN(0),
+        new BN(100),
+        new BN(100),
+        new BN(0)
+    ).accounts({
+        beneficiary: beneficiary.publicKey,
+        vestingAccount: vestingAccountKey
+    }).rpc({ commitment: 'confirmed', skipPreflight: true });
+
+    console.log("Create Employee Account Transaction: ", tx2);
+    console.log("Employee Account: ", employeeAccount.toBase58());
+  })
 })
