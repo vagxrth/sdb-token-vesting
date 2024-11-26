@@ -1,11 +1,13 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Keypair, PublicKey } from '@solana/web3.js';
-import { ProgramTestContext, startAnchor } from "solana-bankrun";
+import { BanksClient, ProgramTestContext, startAnchor } from "solana-bankrun";
 import IDL from "../target/idl/vesting.json"
 import { SYSTEM_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/native/system";
 import { BankrunProvider } from "anchor-bankrun";
 import { Program } from "@coral-xyz/anchor"
 import { Vesting }  from "../target/types/vesting"
+import { createMint } from "@solana/spl-token";
+import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
 
 describe("Vesting Smart Contract Tests", () => {
 
@@ -13,6 +15,10 @@ let beneficiary: Keypair;
 let context: ProgramTestContext;
 let provider: BankrunProvider;
 let program: Program<Vesting>;
+let banksClient: BanksClient;
+let employer: Keypair;
+let mint: PublicKey;
+let beneficiaryProvider: BankrunProvider;
 
   beforeAll(async() => {
     beneficiary = new anchor.web3.Keypair();
@@ -37,5 +43,15 @@ let program: Program<Vesting>;
     anchor.setProvider(provider);
 
     program = new Program<Vesting>(IDL as Vesting, provider);
+
+    banksClient = context.banksClient;
+
+    employer = provider.wallet.payer;
+
+    // @ts-expect-error
+    mint = await createMint(banksClient, employer, employer.publicKey, null, 2);
+
+    beneficiaryProvider = new BankrunProvider(context);
+    beneficiaryProvider.wallet = new NodeWallet(beneficiary);
   })  
 })
