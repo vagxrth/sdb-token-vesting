@@ -1,14 +1,12 @@
 #![allow(clippy::result_large_err)]
 
 use anchor_lang::prelude::*;
-use anchor_spl::{associated_token::AssociatedToken, token_2022::spl_token_2022::extension::memo_transfer::instruction, token_interface::{Mint, TokenAccount, TokenInterface}};
-
+use anchor_spl::associated_token::AssociatedToken;
+use anchor_spl::token_interface::{ self, Mint, TokenAccount, TokenInterface, TransferChecked };
 declare_id!("AsjZ3kWAUSQRNt2pZVeJkywhZ6gpLpHZmJjduPmKZDZZ");
 
 #[program]
 pub mod vesting {
-    use anchor_spl::token::TransferChecked;
-
     use super::*;
 
     pub fn create_vesting_account(ctx: Context<CreateVestingAccount>, company_name: String) -> Result<()> {
@@ -40,7 +38,7 @@ pub mod vesting {
       Ok(())
     }
 
-    pub fn claim_tokens(ctx: Context<ClaimTokens>,company_name: String) -> Result<()> {
+    pub fn claim_tokens(ctx: Context<ClaimTokens>, _company_name: String) -> Result<()> {
       let employee_account = &mut ctx.accounts.employee_account;
       let now = Clock::get()?.unix_timestamp;
       if now < employee_account.cliff_time {
@@ -90,6 +88,10 @@ pub mod vesting {
       let cpi_context = CpiContext::new(cpi_program, transfer_cpi_accounts).with_signer(signer_seeds);
 
       let decimals = ctx.accounts.mint.decimals;
+
+      token_interface::transfer_checked(cpi_context, claimable_amount as u64, decimals)?;
+
+      employee_account.total_withdrawn += claimable_amount;
 
       Ok(())
     }
