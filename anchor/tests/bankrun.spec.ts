@@ -6,7 +6,7 @@ import { SYSTEM_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/native/system";
 import { BankrunProvider } from "anchor-bankrun";
 import { Program } from "@coral-xyz/anchor"
 import { Vesting }  from "../target/types/vesting"
-import { createMint } from "@solana/spl-token";
+import { createMint, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
 import { Buffer } from "buffer";
 
@@ -56,7 +56,7 @@ let employeeAccount: PublicKey;
 
     employer = provider.wallet.payer;
 
-    // @ts-expect-error
+    // @ts-ignore
     mint = await createMint(banksClient, employer, employer.publicKey, null, 2);
 
     beneficiaryProvider = new BankrunProvider(context);
@@ -81,5 +81,18 @@ let employeeAccount: PublicKey;
         ],
         program.programId
     );
-  })  
+  });
+
+  it("Should Create A Vesting Account", async() => {
+    const tx = await program.methods.createVestingAccount(companyName).accounts({
+        signer: employer.publicKey,
+        mint,
+        tokenProgram: TOKEN_PROGRAM_ID
+    }).rpc({ commitment: 'confirmed' });
+
+    const vestingAccountData = await program.account.vestingAccount.fetch(vestingAccountKey, 'confirmed');
+
+    console.log("Create Vesting Account: ", tx);
+    console.log("Vesting Account Data: ", vestingAccountData, null, 2);
+  })
 })
