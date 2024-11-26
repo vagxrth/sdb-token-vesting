@@ -6,9 +6,10 @@ import { SYSTEM_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/native/system";
 import { BankrunProvider } from "anchor-bankrun";
 import { Program } from "@coral-xyz/anchor"
 import { Vesting }  from "../target/types/vesting"
-import { createMint, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
 import { Buffer } from "buffer";
+import { createMint, mintTo } from "spl-token-bankrun";
 
 describe("Vesting Smart Contract Tests", () => {
 
@@ -94,5 +95,13 @@ let employeeAccount: PublicKey;
 
     console.log("Create Vesting Account: ", tx);
     console.log("Vesting Account Data: ", vestingAccountData, null, 2);
-  })
+  });
+
+  it("Should Fund The Cold Token Account", async() => {
+    const amount = 10_000 * 10 ** 9;
+    // @ts-ignore
+    const mintTx = await mintTo(banksClient, employer, mint, coldTokenAccount, employer, amount);
+
+    console.log('Mint Cold Token Account: ', mintTx);
+  });
 })
