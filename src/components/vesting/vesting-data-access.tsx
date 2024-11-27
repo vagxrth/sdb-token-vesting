@@ -1,6 +1,5 @@
 "use client";
 
-import { getVestingProgram, getVestingProgramId } from "@token-vesting/anchor";
 import { useConnection } from "@solana/wallet-adapter-react";
 import { Cluster, PublicKey } from "@solana/web3.js";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -10,6 +9,8 @@ import { useCluster } from "../cluster/cluster-data-access";
 import { useAnchorProvider } from "../solana/solana-provider";
 import { useTransactionToast } from "../ui/ui-layout";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { BN } from "@coral-xyz/anchor";
+import { getVestingProgram, getVestingProgramId } from "@project/anchor";
 
 interface CreateVestingArgs {
   companyName: string;
@@ -81,7 +82,10 @@ export function useVestingProgramAccount({ account }: { account: PublicKey }) {
     mutationKey: ["vesting", "close", { cluster, account }],
     mutationFn: ({ startTime, endTime, totalAmount, cliffTime }) =>
       program.methods
-        .createEmployeeVesting(startTime, endTime, totalAmount, cliffTime)
+        .createEmployeeAccount(new BN(startTime), 
+        new BN(endTime), 
+        new BN(totalAmount), 
+        new BN(cliffTime))
         .rpc(),
     onSuccess: (tx) => {
       transactionToast(tx);
