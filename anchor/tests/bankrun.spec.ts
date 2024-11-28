@@ -1,6 +1,6 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Keypair, PublicKey } from '@solana/web3.js';
-import { BanksClient, ProgramTestContext, startAnchor } from "solana-bankrun";
+import { BanksClient, Clock, ProgramTestContext, startAnchor } from "solana-bankrun";
 import IDL from "../target/idl/vesting.json"
 import { SYSTEM_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/native/system";
 import { BankrunProvider } from "anchor-bankrun";
@@ -118,5 +118,27 @@ let employeeAccount: PublicKey;
 
     console.log("Create Employee Account Transaction: ", tx2);
     console.log("Employee Account: ", employeeAccount.toBase58());
+  });
+
+  it("Should Claim The Employee's Vested Tokens", async() => {
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const currentClock = await banksClient.getClock();
+    context.setClock(
+        new Clock(
+            currentClock.slot,
+            currentClock.epochStartTimestamp,
+            currentClock.epoch,
+            currentClock.leaderScheduleEpoch,
+            1000n
+        )
+    );
+
+    const tx3 = await program2.methods
+    .claimTokens(companyName)
+    .accounts({
+      tokenProgram: TOKEN_PROGRAM_ID,
+    })
+    .rpc({ commitment: "confirmed" });
+    console.log("Claim Token Transaction: ", tx3);
   })
 })
